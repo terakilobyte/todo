@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  client:
+    build:
+      context: ./client/
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_modules
+    ports:
+      - 3000:80
+    environment:
+      - NODE_ENV=prod
+      - NODE_PATH=/usr/app/node_modules
+      - SERVER_URL=server:8000
+    links:
+      - server
+
+  dbmongo:
+    image: mongo:3.6
+    environment:
+      - MONGO_DATA_DIR=/data/db
+    volumes:
+      - ./data/db:/data/db
+    ports:
+        - 29213:29213
+    command: mongod --port 29213 --smallfiles --logpath=/dev/null # --quiet
+
+
+  server:
+    build:
+      context: ./server/
+    volumes:
+      - ./server:/usr/app
+      - /usr/app/node_modules
+      - /usr/app
+    ports:
+      - 8000:8000
+    environment:
+      - NODE_ENV=prod
+      - NODE_PATH=/usr/app/node_modules
+      - MONGODB_URI=mongodb://dbmongo:29213
+      - MONGODB_NS=docker-todos-prod
+    command: nodemon index.js
+    links:
+      - dbmongo
+
+
