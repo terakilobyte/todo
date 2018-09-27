@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   client:
@@ -17,17 +17,6 @@ services:
     links:
       - server
 
-  dbmongo:
-    image: mongo:3.6
-    environment:
-      - MONGO_DATA_DIR=/data/db
-    volumes:
-      - ./data/db:/data/db
-    ports:
-        - 29213:29213
-    command: mongod --port 29213 --smallfiles --logpath=/dev/null # --quiet
-
-
   server:
     build:
       context: ./server/
@@ -40,10 +29,6 @@ services:
     environment:
       - NODE_ENV=prod
       - NODE_PATH=/usr/app/node_modules
-      - MONGODB_URI=mongodb://dbmongo:29213
-      - MONGODB_NS=docker-todos-prod
+      - MONGODB_URI=<ATLAS SRV>
+      - MONGODB_NS=todos
     command: nodemon index.js
-    links:
-      - dbmongo
-
-
